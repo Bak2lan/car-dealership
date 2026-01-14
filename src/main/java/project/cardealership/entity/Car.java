@@ -1,12 +1,15 @@
 package project.cardealership.entity;
 
 
+import lombok.Getter;
+import lombok.Setter;
 import project.cardealership.enums.carEnum.*;
 
 
 import java.math.BigDecimal;
 import java.util.List;
-
+@Getter
+@Setter
 public class Car {
 
     // ==================== ИДЕНТИФИКАЦИЯ ====================
@@ -44,7 +47,7 @@ public class Car {
     private String interiorMaterial;    // Материал салона (кожа, ткань и т.д.)
 
     // ==================== ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ ====================
-    private String countryOfOrigin;     // Страна производства
+
     private int doorsCount;             // Количество дверей
     private int seatsCount;             // Количество мест
     private List<String> imageUrls;     // Ссылки на фотографии
