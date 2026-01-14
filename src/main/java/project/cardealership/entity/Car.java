@@ -15,8 +15,8 @@ public class Car {
     private String licensePlate;        // Госномер
 
     // ==================== ОСНОВНАЯ ИНФОРМАЦИЯ ====================
-    private String brand;               // Марка (например, Toyota)
-    private String model;               // Модель (например, Camry)
+    private Brand brand;               // Марка (например, Toyota)
+    private Model model;               // Модель (например, Camry)
     private int year;                   // Год выпуска
     private CarCategory category;       // Категория (седан, внедорожник и т.д.)
     private TrimLevel trimLevel;        // Комплектация (базовая, люкс и т.д.)
