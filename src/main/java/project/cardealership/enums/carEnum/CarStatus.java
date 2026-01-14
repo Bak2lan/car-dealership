@@ -1,4 +1,4 @@
-package project.cardealership.enums;
+package project.cardealership.enums.carEnum;
 
 import lombok.Getter;
 

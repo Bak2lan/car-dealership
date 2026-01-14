@@ -1,7 +1,7 @@
 package project.cardealership.entity;
 
 
-import project.cardealership.enums.*;
+import project.cardealership.enums.carEnum.*;
 
 
 import java.math.BigDecimal;
@@ -20,6 +20,7 @@ public class Car {
     private int year;                   // Год выпуска
     private CarCategory category;       // Категория (седан, внедорожник и т.д.)
     private TrimLevel trimLevel;        // Комплектация (базовая, люкс и т.д.)
+    private boolean isNew;
 
     // ==================== ЦЕНА И СТАТУС ====================
     private BigDecimal price;           // Цена
