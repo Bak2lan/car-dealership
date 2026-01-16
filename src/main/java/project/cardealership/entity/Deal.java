@@ -21,7 +21,7 @@ public class Deal {
     @ManyToOne
     private Car car;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "buyer_id)")
+    @JoinColumn(name = "buyer_id")
     private User buyer;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id")
