@@ -23,36 +23,62 @@ import java.util.Optional;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final UserRepository userRepository;
-    private JwtService jwtService;
+    private final JwtService jwtService;
 
-    public JwtFilter(UserRepository userRepository) {
+    public JwtFilter(UserRepository userRepository, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
 
     @Override
-    protected void doFilterInternal(@Nonnull HttpServletRequest request,
-                                    @Nonnull HttpServletResponse response,
-                                    @Nonnull FilterChain filterChain) throws ServletException, IOException {
-        String authorization = request.getHeader("Authorization");
-        if (authorization!= null&& authorization.startsWith("Bearer ")){
-            String token = authorization.substring(7);
-            try{
-                if (StringUtils.hasText(token)){
-                    String email = jwtService.verifyToken(token);
-                    User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException("Not found user with this email"));
-                    SecurityContextHolder.getContext().setAuthentication(
-                            new UsernamePasswordAuthenticationToken(
-                                    user.getEmail(),
-                                    null,
-                                    user.getAuthorities()
-                            )
-                    );
-                }
-            }catch (JWTVerificationException e){
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST,"Invalid");
-            }
-        }
-        filterChain.doFilter(request,response);
+    protected void doFilterInternal(
+            @Nonnull HttpServletRequest request,
+            @Nonnull HttpServletResponse response,
+            @Nonnull FilterChain filterChain
+    ) throws ServletException, IOException {
 
+        String authHeader = request.getHeader("Authorization");
+
+        // Если заголовка нет или он не Bearer → просто пропускаем (важно для /api/auth/**)
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String token = authHeader.substring(7);
+
+        // Пустой токен → тоже пропускаем
+        if (!StringUtils.hasText(token)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
+            String email = jwtService.verifyToken(token);
+
+            // Пользователь найден → устанавливаем аутентификацию
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new NoSuchElementException("User not found: " + email));
+
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(
+                            user.getEmail(),
+                            null,
+                            user.getAuthorities()
+                    );
+
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+        } catch (JWTVerificationException e) {
+            // ← Самое важное изменение
+            // НЕ прерываем цепочку! Просто НЕ аутентифицируем → запрос идёт дальше
+            // Для защищённых эндпоинтов Security сам вернёт 401/403
+            // Для публичных — дойдёт до контроллера
+        } catch (NoSuchElementException e) {
+            // Аналогично — пользователь не найден → не аутентифицируем
+        }
+
+        // В любом случае продолжаем цепочку
+        filterChain.doFilter(request, response);
     }
 }

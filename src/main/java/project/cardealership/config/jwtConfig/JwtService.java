@@ -13,10 +13,10 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 @Component
 public class JwtService {
-    @Value("AvtoSalon")
+    @Value("${jwt-secret-key}")
     private String secretKey;
 
-    public String generateToken(User user){
+    public String generateToken  (User user){
         return JWT.create()
                 .withClaim("email",user.getEmail())
                 .withIssuedAt(new Date())
