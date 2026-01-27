@@ -1,5 +1,6 @@
 package project.cardealership.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,12 +22,12 @@ public class AuthenticationAPI {
     private final UserServiceImpl userService;
 
     @PostMapping("/signUp")
-    public AuthenticationResponse signUp(@RequestBody SignUpRequest signUpRequest) throws BadRequestException, AlreadyExistException {
+    public AuthenticationResponse signUp(@Valid @RequestBody SignUpRequest signUpRequest) throws BadRequestException, AlreadyExistException {
        return userService.signUpResponse(signUpRequest);
     }
 
     @PostMapping("/signIn")
-    public AuthenticationResponse signIn(@RequestBody SignInRequest signInRequest) throws BadRequestException, AlreadyExistException, BadCredentialException {
+    public AuthenticationResponse signIn(@Valid @RequestBody SignInRequest signInRequest) throws BadRequestException, AlreadyExistException, BadCredentialException {
         return userService.signInResponse(signInRequest);
     }
 

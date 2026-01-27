@@ -2,20 +2,31 @@ package project.cardealership.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import project.cardealership.config.jwtConfig.JwtService;
 import project.cardealership.dto.reponse.AuthenticationResponse;
+import project.cardealership.dto.reponse.SimpleResponse;
+import project.cardealership.dto.reponse.UsersGetAll;
 import project.cardealership.dto.request.SignInRequest;
 import project.cardealership.dto.request.SignUpRequest;
+import project.cardealership.dto.request.UserRequest;
 import project.cardealership.entity.User;
 import project.cardealership.exception.AlreadyExistException;
 import project.cardealership.exception.BadCredentialException;
 import project.cardealership.exception.BadRequestException;
+import project.cardealership.exception.handler.AccessDeniedException;
 import project.cardealership.repository.UserRepository;
 import project.cardealership.service.UserService;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -29,8 +40,7 @@ public class UserServiceImpl implements UserService {
     private final   PasswordEncoder passwordEncoder;
 
     @Override
-    public AuthenticationResponse signUpResponse(SignUpRequest signUpRequest) throws AlreadyExistException,
-            BadRequestException {
+    public AuthenticationResponse signUpResponse(SignUpRequest signUpRequest) throws AlreadyExistException{
         if (userRepository.findByEmail(signUpRequest.getEmail()).isPresent()){
             throw new AlreadyExistException("User with this email is already exist");
         }
@@ -43,9 +53,6 @@ public class UserServiceImpl implements UserService {
         user.setPhoneNumber(signUpRequest.getPhoneNumber());
         user.setUsername(signUpRequest.getUserName());
         user.setEmail(signUpRequest.getEmail());
-        if (signUpRequest.getPassword().length()<8){
-            throw new BadRequestException("User password's length must be more than 8 symbol ");
-        }
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         user.setCreatedAt(LocalDate.now());
         userRepository.save(user);
@@ -76,5 +83,45 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .build();
+    }
+
+
+    // NEED to FIX
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Override
+    public SimpleResponse saveUserWithRole(UserRequest userRequest) throws AccessDeniedException, BadRequestException, AlreadyExistException {
+            User newUser= new User();
+            newUser.setFirstName(userRequest.getFirstName());
+            newUser.setLastName(userRequest.getLastName());
+            newUser.setEmail(userRequest.getEmail());
+            newUser.setRole(userRequest.getRole());
+            newUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+            newUser.setPhoneNumber(userRequest.getPhoneNumber());
+            if (userRepository.existsByUsername(userRequest.getUserName())){
+                throw new AlreadyExistException("User with this username is already exist");
+            }
+            newUser.setUsername(userRequest.getUserName());
+            newUser.setCreatedAt(LocalDate.now());
+            userRepository.save(newUser);
+            return SimpleResponse.builder()
+                    .message("User successfully saved")
+                    .httpStatus(HttpStatus.OK)
+                    .build();
+        }
+
+
+    @Override
+    public SimpleResponse updateUser(Long id) {
+        return null;
+    }
+
+    @Override
+    public SimpleResponse deleteUser(Long id) {
+        return null;
+    }
+
+    @Override
+    public List<UsersGetAll> getAllUsers() {
+        return List.of();
     }
 }

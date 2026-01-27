@@ -1,17 +1,13 @@
 package project.cardealership.dto.request;
+import jakarta.validation.constraints.*;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.*;
-
+import project.cardealership.enums.userEnum.Role;
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Getter
 @Setter
-public class SignUpRequest {
+public class UserRequest {
     @NotBlank(message = "Can not be empty")
     @Size(min = 3,max = 50,message = "First name must be from 3, to 50 symbols")
     private String firstName;
@@ -30,5 +26,6 @@ public class SignUpRequest {
     @NotBlank(message = "Password cannot be ")
     @Size(min = 8, max = 50, message= "Password length must be from 8, to 50 symbols")
     private String password;
-
+    @NotBlank(message = "Fill the role field")
+    private Role role;
 }
